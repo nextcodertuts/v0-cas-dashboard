@@ -71,10 +71,10 @@ export function Sidebar() {
                     ? "bg-accent"
                     : "transparent"
                 )}
-                title="Admin Dashboard"
+                title="Dashboard"
               >
                 <LayoutDashboard className="h-4 w-4" />
-                {!isCollapsed && "Admin Dashboard"}
+                {!isCollapsed && "Dashboard"}
               </Link>
               <Link
                 href="/admin/hospitals"
