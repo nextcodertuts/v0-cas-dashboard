@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ClipboardList,
   HospitalIcon,
+  Users,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -87,6 +88,18 @@ export function Sidebar() {
                 <HospitalIcon className="h-4 w-4" />
                 {!isCollapsed && "Hospitals"}
               </Link>
+              <Link
+                href="/admin/agents"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/agents")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+              >
+                <Users className="h-4 w-4" />
+                {!isCollapsed && "Agents"}
+              </Link>
             </>
           )}
 
@@ -99,10 +112,10 @@ export function Sidebar() {
                   ? "bg-accent"
                   : "transparent"
               )}
-              title="Office Dashboard"
+              title="Dashboard"
             >
               <LayoutDashboard className="h-4 w-4" />
-              {!isCollapsed && "Office Dashboard"}
+              {!isCollapsed && "Dashboard"}
             </Link>
           )}
 
