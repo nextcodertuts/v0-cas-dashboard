@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  OFFICE_AGENT
+  HOSPITAL_USER
+}
+
+enum CardStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELLED
+}
+
+enum MemberRelation {
+  HEAD
+  SPOUSE
+  CHILD
+  PARENT
+  OTHER
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  createdCards Card[]     @relation("CreatedBy")
+  updatedCards Card[]     @relation("UpdatedBy")
+  auditLogs    AuditLog[]
+}
+
+model Plan {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String
+  price        Decimal  @db.Decimal(10, 2)
+  durationDays Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  cards        Card[]
+}
+
+model Household {
+  id        String    @id @default(cuid())
+  headName  String
+  address   String
+  phone     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  members   Member[]
+  card      Card?
+}
+
+model Member {
+  id          String         @id @default(cuid())
+  householdId String
+  firstName   String
+  lastName    String
+  dob         DateTime
+  relation    MemberRelation
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  household   Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+}
+
+model Card {
+  id          String     @id @default(cuid())
+  householdId String     @unique
+  planId      String
+  status      CardStatus
+  issueDate   DateTime
+  expiryDate  DateTime
+  createdById String
+  updatedById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  plan        Plan       @relation(fields: [planId], references: [id])
+  createdBy   User       @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedBy   User       @relation("UpdatedBy", fields: [updatedById], references: [id])
+  auditLogs   AuditLog[]
+
+  @@index([planId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  cardId    String?
+  action    String
+  timestamp DateTime @default(now())
+  metadata  Json?
+  user      User     @relation(fields: [userId], references: [id])
+  card      Card?    @relation(fields: [cardId], references: [id])
+
+  @@index([userId])
+  @@index([cardId])
+}
