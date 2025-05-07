@@ -15,6 +15,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -142,6 +143,20 @@ export function Sidebar() {
 
           {isAdmin && (
             <>
+              <Link
+                href="/admin/plans"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/plans")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+                title="Plans"
+              >
+                <ClipboardList className="h-4 w-4" />
+                {!isCollapsed && "Plans"}
+              </Link>
+
               <Link
                 href="/admin/audit-logs"
                 className={cn(

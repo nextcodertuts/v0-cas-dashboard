@@ -1,13 +1,27 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,85 +29,85 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { Plus, MoreHorizontal, Search } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Plus, MoreHorizontal, Search } from "lucide-react";
 
 interface Household {
-  id: string
-  headName: string
-  address: string
-  phone: string
-  members: any[]
+  id: string;
+  headName: string;
+  address: string;
+  phone: string;
+  members: any[];
   card: {
-    id: string
-    status: string
-    expiryDate: string
+    id: string;
+    status: string;
+    expiryDate: string;
     plan: {
-      name: string
-    }
-  } | null
+      name: string;
+    };
+  } | null;
 }
 
 export default function HouseholdsPage() {
-  const router = useRouter()
-  const [households, setHouseholds] = useState<Household[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter();
+  const [households, setHouseholds] = useState<Household[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetchHouseholds()
-  }, [])
+    fetchHouseholds();
+  }, []);
 
   const fetchHouseholds = async (search?: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const queryParams = new URLSearchParams()
+      const queryParams = new URLSearchParams();
       if (search) {
-        queryParams.append("search", search)
+        queryParams.append("search", search);
       }
 
-      const response = await fetch(`/api/households?${queryParams.toString()}`)
-      if (!response.ok) throw new Error("Failed to fetch households")
+      const response = await fetch(`/api/households?${queryParams.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch households");
 
-      const data = await response.json()
-      setHouseholds(data)
+      const data = await response.json();
+      setHouseholds(data);
     } catch (error) {
-      console.error("Error fetching households:", error)
+      console.error("Error fetching households:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    fetchHouseholds(searchQuery)
-  }
+    e.preventDefault();
+    fetchHouseholds(searchQuery);
+  };
 
   const getStatusColor = (status: string | undefined) => {
-    if (!status) return "bg-gray-500"
+    if (!status) return "bg-gray-500";
 
     switch (status) {
       case "ACTIVE":
-        return "bg-green-500"
+        return "bg-green-500";
       case "SUSPENDED":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "EXPIRED":
-        return "bg-red-500"
+        return "bg-red-500";
       case "CANCELLED":
-        return "bg-gray-500"
+        return "bg-gray-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const handleViewDetails = (id: string) => {
-    router.push(`/agent/households/${id}`)
-  }
+    router.push(`/agent/households/${id}`);
+  };
 
   const handleCreateCard = (id: string) => {
-    router.push(`/agent/cards/new?householdId=${id}`)
-  }
+    router.push(`/agent/cards/new?householdId=${id}`);
+  };
 
   return (
     <div className="space-y-4">
@@ -107,10 +121,15 @@ export default function HouseholdsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Manage Households</CardTitle>
-          <CardDescription>View and manage all registered households</CardDescription>
+          <CardDescription>
+            View and manage all registered households
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2 mb-4">
+          <form
+            onSubmit={handleSearch}
+            className="flex w-full max-w-sm items-center space-x-2 mb-4"
+          >
             <Input
               placeholder="Search households..."
               value={searchQuery}
@@ -140,12 +159,18 @@ export default function HouseholdsPage() {
               <TableBody>
                 {households.map((household) => (
                   <TableRow key={household.id}>
-                    <TableCell className="font-medium">{household.headName}</TableCell>
+                    <TableCell className="font-medium">
+                      {household.headName}
+                    </TableCell>
                     <TableCell>{household.phone}</TableCell>
                     <TableCell>{household.members.length}</TableCell>
                     <TableCell>
                       {household.card ? (
-                        <Badge className={getStatusColor(household.card.status)}>{household.card.status}</Badge>
+                        <Badge
+                          className={getStatusColor(household.card.status)}
+                        >
+                          {household.card.status}
+                        </Badge>
                       ) : (
                         <Badge variant="outline">NO CARD</Badge>
                       )}
@@ -161,12 +186,16 @@ export default function HouseholdsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleViewDetails(household.id)}>
+                          <DropdownMenuItem
+                            onClick={() => handleViewDetails(household.id)}
+                          >
                             View details
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {!household.card && (
-                            <DropdownMenuItem onClick={() => handleCreateCard(household.id)}>
+                            <DropdownMenuItem
+                              onClick={() => handleCreateCard(household.id)}
+                            >
                               Issue card
                             </DropdownMenuItem>
                           )}
@@ -181,5 +210,5 @@ export default function HouseholdsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
