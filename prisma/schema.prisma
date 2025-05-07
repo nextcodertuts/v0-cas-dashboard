@@ -42,6 +42,19 @@ model User {
   createdCards Card[]     @relation("CreatedBy")
   updatedCards Card[]     @relation("UpdatedBy")
   auditLogs    AuditLog[]
+  hospital     Hospital?  @relation("HospitalUser")
+}
+
+model Hospital {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String
+  licenseNo String   @unique
+  user      User     @relation("HospitalUser", fields: [userId], references: [id])
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Plan {
@@ -56,12 +69,12 @@ model Plan {
 }
 
 model Household {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   headName  String
   address   String
   phone     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   members   Member[]
   card      Card?
 }
@@ -72,6 +85,7 @@ model Member {
   firstName   String
   lastName    String
   dob         DateTime
+  aadhaarNo   String         @unique
   relation    MemberRelation
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
