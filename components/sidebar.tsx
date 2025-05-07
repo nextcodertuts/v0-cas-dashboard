@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  HospitalIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -60,19 +61,33 @@ export function Sidebar() {
       <div className="flex-1 overflow-auto py-2">
         <nav className="grid gap-1 px-2">
           {isAdmin && (
-            <Link
-              href="/admin/dashboard"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                pathname.startsWith("/admin/dashboard")
-                  ? "bg-accent"
-                  : "transparent"
-              )}
-              title="Admin Dashboard"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              {!isCollapsed && "Admin Dashboard"}
-            </Link>
+            <>
+              <Link
+                href="/admin/dashboard"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/dashboard")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+                title="Admin Dashboard"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                {!isCollapsed && "Admin Dashboard"}
+              </Link>
+              <Link
+                href="/admin/hospitals"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/hospitals")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+              >
+                <HospitalIcon className="h-4 w-4" />
+                {!isCollapsed && "Hospitals"}
+              </Link>
+            </>
           )}
 
           {isOfficeAgent && (

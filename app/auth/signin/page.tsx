@@ -84,6 +84,7 @@ export default function SignIn() {
               <Input
                 id="password"
                 type="password"
+                placeholder="enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -91,7 +92,7 @@ export default function SignIn() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full mt-8" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </CardFooter>
