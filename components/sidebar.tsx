@@ -8,7 +8,6 @@ import { useSession } from "next-auth/react";
 import { UserNav } from "@/components/user-nav";
 import {
   LayoutDashboard,
-  Users,
   FileText,
   CreditCard,
   Home,
@@ -143,18 +142,6 @@ export function Sidebar() {
 
           {isAdmin && (
             <>
-              <Link
-                href="/admin/users"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                  pathname === "/admin/users" ? "bg-accent" : "transparent"
-                )}
-                title="Users"
-              >
-                <Users className="h-4 w-4" />
-                {!isCollapsed && "Users"}
-              </Link>
-
               <Link
                 href="/admin/audit-logs"
                 className={cn(
