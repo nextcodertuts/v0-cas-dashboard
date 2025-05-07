@@ -42,9 +42,7 @@ export function Sidebar() {
       )}
     >
       <div className="flex h-14 items-center justify-between border-b px-4">
-        {!isCollapsed && (
-          <span className="font-semibold">Health Card System</span>
-        )}
+        {!isCollapsed && <span className="font-bold text-2xl">CAS</span>}
         <Button
           variant="ghost"
           size="icon"

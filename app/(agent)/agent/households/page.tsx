@@ -32,6 +32,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal, Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Household {
   id: string;
@@ -54,6 +64,9 @@ export default function HouseholdsPage() {
   const [households, setHouseholds] = useState<Household[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     fetchHouseholds();
@@ -103,6 +116,27 @@ export default function HouseholdsPage() {
 
   const handleViewDetails = (id: string) => {
     router.push(`/agent/households/${id}`);
+  };
+
+  const handleEdit = (id: string) => {
+    router.push(`/agent/households/${id}/edit`);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/households/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete household");
+      }
+
+      await fetchHouseholds(searchQuery);
+      setDeleteHouseholdId(null);
+    } catch (error) {
+      console.error("Error deleting household:", error);
+    }
   };
 
   const handleCreateCard = (id: string) => {
@@ -191,6 +225,11 @@ export default function HouseholdsPage() {
                           >
                             View details
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(household.id)}
+                          >
+                            Edit household
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {!household.card && (
                             <DropdownMenuItem
@@ -199,6 +238,12 @@ export default function HouseholdsPage() {
                               Issue card
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => setDeleteHouseholdId(household.id)}
+                          >
+                            Delete household
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -209,6 +254,31 @@ export default function HouseholdsPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={!!deleteHouseholdId}
+        onOpenChange={() => setDeleteHouseholdId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              household and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                deleteHouseholdId && handleDelete(deleteHouseholdId)
+              }
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

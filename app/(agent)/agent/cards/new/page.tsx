@@ -90,10 +90,11 @@ export default function NewCardPage() {
   const fetchHousehold = async (id: string) => {
     setLoadingHousehold(true);
     try {
-      const response = await fetch(`/api/households?id=${id}`);
+      const response = await fetch(`/api/households/${id}`);
       if (!response.ok) throw new Error("Failed to fetch household");
 
       const data = await response.json();
+      console.log("househo;d", data);
 
       setHousehold(data);
     } catch (error) {
@@ -171,25 +172,25 @@ export default function NewCardPage() {
                 <p className="text-sm font-medium text-muted-foreground">
                   Head Name
                 </p>
-                <p className="font-medium">{household[0].headName}</p>
+                <p className="font-medium">{household.headName}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Phone
                 </p>
-                <p>{household[0].phone}</p>
+                <p>{household.phone}</p>
               </div>
               <div className="col-span-2">
                 <p className="text-sm font-medium text-muted-foreground">
                   Address
                 </p>
-                <p>{household[0].address}</p>
+                <p>{household.address}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Members
                 </p>
-                <p>{household[0].members.length}</p>
+                <p>{household.members.length}</p>
               </div>
             </div>
           </CardContent>
