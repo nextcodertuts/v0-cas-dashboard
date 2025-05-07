@@ -1,47 +1,67 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MemberRelation } from "@prisma/client"
-import { CalendarIcon, Plus, Trash2 } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MemberRelation } from "@prisma/client";
+import { CalendarIcon, Plus, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface MemberForm {
-  firstName: string
-  lastName: string
-  dob: Date | undefined
-  relation: MemberRelation
+  firstName: string;
+  lastName: string;
+  dob: Date | undefined;
+  aadhaarNo: string;
+  relation: MemberRelation;
 }
 
 export default function NewHouseholdPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [headName, setHeadName] = useState("")
-  const [address, setAddress] = useState("")
-  const [phone, setPhone] = useState("")
+  const [headName, setHeadName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [members, setMembers] = useState<MemberForm[]>([
     {
       firstName: "",
       lastName: "",
       dob: undefined,
+      aadhaarNo: "",
       relation: MemberRelation.HEAD,
     },
-  ])
+  ]);
 
   const handleAddMember = () => {
     setMembers([
@@ -50,43 +70,54 @@ export default function NewHouseholdPage() {
         firstName: "",
         lastName: "",
         dob: undefined,
+        aadhaarNo: "",
         relation: MemberRelation.OTHER,
       },
-    ])
-  }
+    ]);
+  };
 
   const handleRemoveMember = (index: number) => {
-    if (members.length === 1) return
-    setMembers(members.filter((_, i) => i !== index))
-  }
+    if (members.length === 1) return;
+    setMembers(members.filter((_, i) => i !== index));
+  };
 
-  const handleMemberChange = (index: number, field: keyof MemberForm, value: any) => {
-    const updatedMembers = [...members]
+  const handleMemberChange = (
+    index: number,
+    field: keyof MemberForm,
+    value: any
+  ) => {
+    const updatedMembers = [...members];
     updatedMembers[index] = {
       ...updatedMembers[index],
       [field]: value,
-    }
-    setMembers(updatedMembers)
-  }
+    };
+    setMembers(updatedMembers);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     // Validate form
     if (!headName || !address || !phone) {
-      setError("Please fill in all required fields")
-      setIsLoading(false)
-      return
+      setError("Please fill in all required fields");
+      setIsLoading(false);
+      return;
     }
 
     // Validate members
     for (const member of members) {
-      if (!member.firstName || !member.lastName || !member.dob || !member.relation) {
-        setError("Please fill in all member details")
-        setIsLoading(false)
-        return
+      if (
+        !member.firstName ||
+        !member.lastName ||
+        !member.dob ||
+        !member.aadhaarNo ||
+        !member.relation
+      ) {
+        setError("Please fill in all member details");
+        setIsLoading(false);
+        return;
       }
     }
 
@@ -102,21 +133,21 @@ export default function NewHouseholdPage() {
           phone,
           members,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to create household")
+        const data = await response.json();
+        throw new Error(data.error || "Failed to create household");
       }
 
-      router.push("/agent/households")
-      router.refresh()
+      router.push("/agent/households");
+      router.refresh();
     } catch (err: any) {
-      setError(err.message || "An error occurred while creating the household")
+      setError(err.message || "An error occurred while creating the household");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -131,7 +162,9 @@ export default function NewHouseholdPage() {
         <Card>
           <CardHeader>
             <CardTitle>Household Information</CardTitle>
-            <CardDescription>Enter the details of the new household</CardDescription>
+            <CardDescription>
+              Enter the details of the new household
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
@@ -142,17 +175,32 @@ export default function NewHouseholdPage() {
 
             <div className="space-y-2">
               <Label htmlFor="headName">Head Name</Label>
-              <Input id="headName" value={headName} onChange={(e) => setHeadName(e.target.value)} required />
+              <Input
+                id="headName"
+                value={headName}
+                onChange={(e) => setHeadName(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
-              <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              <Input
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
             </div>
 
             <Separator className="my-4" />
@@ -160,7 +208,12 @@ export default function NewHouseholdPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Members</h3>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddMember}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddMember}
+                >
                   <Plus className="h-4 w-4 mr-2" /> Add Member
                 </Button>
               </div>
@@ -171,7 +224,12 @@ export default function NewHouseholdPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Member {index + 1}</h4>
                       {members.length > 1 && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveMember(index)}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveMember(index)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -183,7 +241,13 @@ export default function NewHouseholdPage() {
                         <Input
                           id={`firstName-${index}`}
                           value={member.firstName}
-                          onChange={(e) => handleMemberChange(index, "firstName", e.target.value)}
+                          onChange={(e) =>
+                            handleMemberChange(
+                              index,
+                              "firstName",
+                              e.target.value
+                            )
+                          }
                           required
                         />
                       </div>
@@ -193,7 +257,13 @@ export default function NewHouseholdPage() {
                         <Input
                           id={`lastName-${index}`}
                           value={member.lastName}
-                          onChange={(e) => handleMemberChange(index, "lastName", e.target.value)}
+                          onChange={(e) =>
+                            handleMemberChange(
+                              index,
+                              "lastName",
+                              e.target.value
+                            )
+                          }
                           required
                         />
                       </div>
@@ -206,18 +276,24 @@ export default function NewHouseholdPage() {
                               variant="outline"
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !member.dob && "text-muted-foreground",
+                                !member.dob && "text-muted-foreground"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {member.dob ? format(member.dob, "PPP") : <span>Pick a date</span>}
+                              {member.dob ? (
+                                format(member.dob, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">
                             <Calendar
                               mode="single"
                               selected={member.dob}
-                              onSelect={(date) => handleMemberChange(index, "dob", date)}
+                              onSelect={(date) =>
+                                handleMemberChange(index, "dob", date)
+                              }
                               initialFocus
                             />
                           </PopoverContent>
@@ -225,10 +301,33 @@ export default function NewHouseholdPage() {
                       </div>
 
                       <div className="space-y-2">
+                        <Label htmlFor={`aadhaarNo-${index}`}>
+                          Aadhaar Number
+                        </Label>
+                        <Input
+                          id={`aadhaarNo-${index}`}
+                          value={member.aadhaarNo}
+                          onChange={(e) =>
+                            handleMemberChange(
+                              index,
+                              "aadhaarNo",
+                              e.target.value
+                            )
+                          }
+                          required
+                          pattern="[0-9]{12}"
+                          maxLength={12}
+                          placeholder="12-digit Aadhaar number"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
                         <Label htmlFor={`relation-${index}`}>Relation</Label>
                         <Select
                           value={member.relation}
-                          onValueChange={(value) => handleMemberChange(index, "relation", value)}
+                          onValueChange={(value) =>
+                            handleMemberChange(index, "relation", value)
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select relation" />
@@ -249,7 +348,11 @@ export default function NewHouseholdPage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" type="button" onClick={() => router.back()}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => router.back()}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -259,5 +362,5 @@ export default function NewHouseholdPage() {
         </Card>
       </form>
     </div>
-  )
+  );
 }
