@@ -28,6 +28,11 @@ export async function GET(req: NextRequest) {
     ];
   }
 
+  // Add createdById filter for office agents
+  if (session.user.role === "OFFICE_AGENT") {
+    where.createdById = session.user.id;
+  }
+
   try {
     const households = await prisma.household.findMany({
       where,
@@ -66,12 +71,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { headName, address, phone, members } = body;
 
-    // Create the household
+    // Create the household with createdById
     const household = await prisma.household.create({
       data: {
         headName,
         address,
         phone,
+        createdById: session.user.id,
       },
     });
 

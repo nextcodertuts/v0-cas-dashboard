@@ -36,6 +36,14 @@ export async function GET(
       );
     }
 
+    // Check if agent has access to this household
+    if (
+      session.user.role === "OFFICE_AGENT" &&
+      household.createdById !== session.user.id
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     return NextResponse.json(household);
   } catch (error) {
     console.error("Error fetching household:", error);
@@ -62,6 +70,40 @@ export async function PUT(
   }
 
   try {
+    // Check if household exists and get its card status
+    const existingHousehold = await prisma.household.findUnique({
+      where: { id },
+      include: {
+        card: true,
+      },
+    });
+
+    if (!existingHousehold) {
+      return NextResponse.json(
+        { error: "Household not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if agent has access to this household
+    if (
+      session.user.role === "OFFICE_AGENT" &&
+      existingHousehold.createdById !== session.user.id
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Check if card is active for office agents
+    if (
+      session.user.role === "OFFICE_AGENT" &&
+      existingHousehold.card?.status === "ACTIVE"
+    ) {
+      return NextResponse.json(
+        { error: "Cannot edit household with active card" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { headName, address, phone, members } = body;
 
@@ -117,6 +159,40 @@ export async function DELETE(
   }
 
   try {
+    // Check if household exists and get its card status
+    const household = await prisma.household.findUnique({
+      where: { id },
+      include: {
+        card: true,
+      },
+    });
+
+    if (!household) {
+      return NextResponse.json(
+        { error: "Household not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if agent has access to this household
+    if (
+      session.user.role === "OFFICE_AGENT" &&
+      household.createdById !== session.user.id
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Check if card is active for office agents
+    if (
+      session.user.role === "OFFICE_AGENT" &&
+      household.card?.status === "ACTIVE"
+    ) {
+      return NextResponse.json(
+        { error: "Cannot delete household with active card" },
+        { status: 403 }
+      );
+    }
+
     await prisma.household.delete({
       where: { id: id },
     });

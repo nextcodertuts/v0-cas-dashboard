@@ -55,17 +55,18 @@ enum DonorType {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   name         String
   passwordHash String
   role         UserRole
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  createdCards Card[]     @relation("CreatedBy")
-  updatedCards Card[]     @relation("UpdatedBy")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  createdCards Card[]      @relation("CreatedBy")
+  updatedCards Card[]      @relation("UpdatedBy")
   auditLogs    AuditLog[]
-  hospital     Hospital?  @relation("HospitalUser")
+  hospital     Hospital?   @relation("HospitalUser")
+  households   Household[] @relation("CreatedBy")
 }
 
 model Hospital {
@@ -120,14 +121,18 @@ model Plan {
 }
 
 model Household {
-  id        String   @id @default(cuid())
-  headName  String
-  address   String
-  phone     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  members   Member[]
-  card      Card?
+  id          String   @id @default(cuid())
+  headName    String
+  address     String
+  phone       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  members     Member[]
+  card        Card?
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById String
+
+  @@index([createdById])
 }
 
 model Member {
