@@ -86,7 +86,7 @@ export function Sidebar() {
                     : "transparent"
                 )}
               >
-                <HospitalIcon className="h-4 w-4" />
+                <HospitalIcon className="h-4 w-4 text-green-400" />
                 {!isCollapsed && "Hospitals"}
               </Link>
               <Link
@@ -110,7 +110,7 @@ export function Sidebar() {
                     : "transparent"
                 )}
               >
-                <Heart className="h-4 w-4 text-white" fill="red" />
+                <Heart className="h-5 w-5 text-white" fill="red" />
                 {!isCollapsed && "Donations"}
               </Link>
               <Link
@@ -123,7 +123,7 @@ export function Sidebar() {
                 )}
                 title="Cards"
               >
-                <CreditCard className="h-4 w-4" />
+                <CreditCard className="h-4 w-4 text-orange-400" />
                 {!isCollapsed && "Cards"}
               </Link>
             </>
