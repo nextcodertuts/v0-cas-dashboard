@@ -178,17 +178,6 @@ export function Sidebar() {
                 <Home className="h-4 w-4" />
                 {!isCollapsed && "Households"}
               </Link>
-              <Link
-                href="/agent/settings"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                  pathname === "/agent/settings" ? "bg-accent" : "transparent"
-                )}
-                title="Settings"
-              >
-                <Settings className="h-4 w-4" />
-                {!isCollapsed && "Settings"}
-              </Link>
             </>
           )}
 
