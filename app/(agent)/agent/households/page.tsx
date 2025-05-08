@@ -42,6 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useSession } from "next-auth/react";
 
 interface Household {
   id: string;
@@ -61,12 +62,15 @@ interface Household {
 
 export default function HouseholdsPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(
     null
   );
+
+  const isAdmin = session?.user?.role === "ADMIN";
 
   useEffect(() => {
     fetchHouseholds();
@@ -231,7 +235,7 @@ export default function HouseholdsPage() {
                             Edit household
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          {!household.card && (
+                          {isAdmin && !household.card && (
                             <DropdownMenuItem
                               onClick={() => handleCreateCard(household.id)}
                             >
