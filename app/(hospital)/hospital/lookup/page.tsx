@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +16,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
-
-type CardStatus = "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
+import type { CardStatus } from "@prisma/client";
+import { format } from "date-fns";
 
 interface Member {
   id: string;
@@ -27,6 +25,7 @@ interface Member {
   lastName: string;
   dob: string;
   relation: string;
+  aadhaarNo: string;
 }
 
 interface CardDetails {
@@ -63,56 +62,19 @@ export default function HospitalLookup() {
     setCardDetails(null);
 
     try {
-      // In a real app, this would be an API call
-      // const response = await fetch(`/api/cards/lookup?query=${searchQuery}`)
-      // if (!response.ok) throw new Error("Card not found")
-      // const data = await response.json()
+      const response = await fetch(`/api/cards/lookup?query=${searchQuery}`);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to find card");
+      }
 
-      // Simulating API response for demo
-      setTimeout(() => {
-        if (searchQuery === "123456") {
-          setCardDetails({
-            id: "card_123456",
-            status: "ACTIVE",
-            issueDate: "2023-01-01",
-            expiryDate: "2024-01-01",
-            household: {
-              id: "household_123",
-              headName: "John Doe",
-              address: "123 Main St, City",
-              phone: "+1234567890",
-              members: [
-                {
-                  id: "member_1",
-                  firstName: "John",
-                  lastName: "Doe",
-                  dob: "1980-01-01",
-                  relation: "HEAD",
-                },
-                {
-                  id: "member_2",
-                  firstName: "Jane",
-                  lastName: "Doe",
-                  dob: "1985-05-15",
-                  relation: "SPOUSE",
-                },
-              ],
-            },
-            plan: {
-              id: "plan_1",
-              name: "Premium Health Plan",
-              description: "Comprehensive health coverage for the whole family",
-            },
-          });
-        } else {
-          setError(
-            "Card not found. Please check the card number and try again."
-          );
-        }
-        setIsLoading(false);
-      }, 1000);
+      const data = await response.json();
+      setCardDetails(data);
     } catch (err) {
-      setError("An error occurred while searching for the card.");
+      setError(
+        err instanceof Error ? err.message : "An error occurred while searching"
+      );
+    } finally {
       setIsLoading(false);
     }
   };
@@ -138,17 +100,20 @@ export default function HospitalLookup() {
         <CardHeader>
           <CardTitle>Card Lookup</CardTitle>
           <CardDescription>
-            Enter a card number to check eligibility and status
+            Enter a mobile number or Aadhaar number to check eligibility and
+            status
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="cardNumber">Card Number</Label>
+              <Label htmlFor="searchQuery">
+                Mobile Number or Aadhaar Number
+              </Label>
               <div className="flex w-full items-center space-x-2">
                 <Input
-                  id="cardNumber"
-                  placeholder="Enter card number"
+                  id="searchQuery"
+                  placeholder="Enter mobile or Aadhaar number"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -179,7 +144,7 @@ export default function HospitalLookup() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Card ID
                   </p>
-                  <p>{cardDetails.id}</p>
+                  <p className="uppercase">{cardDetails.id}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
@@ -191,13 +156,13 @@ export default function HospitalLookup() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Issue Date
                   </p>
-                  <p>{new Date(cardDetails.issueDate).toLocaleDateString()}</p>
+                  <p>{format(cardDetails.issueDate, "dd/MM/yyyy")}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Expiry Date
                   </p>
-                  <p>{new Date(cardDetails.expiryDate).toLocaleDateString()}</p>
+                  <p>{format(cardDetails.expiryDate, "dd/MM/yyyy")}</p>
                 </div>
               </div>
 
@@ -251,7 +216,13 @@ export default function HospitalLookup() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Date of Birth
                           </p>
-                          <p>{new Date(member.dob).toLocaleDateString()}</p>
+                          <p>{format(member.dob, "dd/MM/yyyy")}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Aadhaar Number
+                          </p>
+                          <p>{member.aadhaarNo}</p>
                         </div>
                       </div>
                     </div>

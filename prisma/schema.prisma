@@ -40,6 +40,20 @@ enum DonationType {
   OTHER
 }
 
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  UPI
+  CHEQUE
+  CREDIT_CARD
+  DEBIT_CARD
+}
+
+enum DonorType {
+  INDIVIDUAL
+  ORGANIZATION
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -52,36 +66,46 @@ model User {
   updatedCards Card[]     @relation("UpdatedBy")
   auditLogs    AuditLog[]
   hospital     Hospital?  @relation("HospitalUser")
-  donations    Donation[]
 }
 
 model Hospital {
-  id        String     @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
   address   String
   phone     String
-  licenseNo String     @unique
-  user      User       @relation("HospitalUser", fields: [userId], references: [id])
-  userId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  donations Donation[]
+  licenseNo String   @unique
+  user      User     @relation("HospitalUser", fields: [userId], references: [id])
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Donation {
-  id          String       @id @default(cuid())
-  type        DonationType
-  amount      Decimal?     @db.Decimal(10, 2)
-  description String
-  donorId     String
-  hospitalId  String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  donor       User         @relation(fields: [donorId], references: [id])
-  hospital    Hospital     @relation(fields: [hospitalId], references: [id])
+  id               String        @id @default(cuid())
+  donorName        String
+  donorEmail       String?
+  donorPhone       String?
+  donorAddress     String?
+  donorType        DonorType
+  donorPAN         String? // PAN card number for tax purposes
+  organizationName String? // For organizational donors
+  type             DonationType
+  amount           Decimal       @db.Decimal(10, 2)
+  description      String?
+  paymentMethod    PaymentMethod
+  paymentReference String? // Cheque number, transaction ID, etc.
+  paymentDate      DateTime      @default(now())
+  receiptNumber    String        @unique // For generating donation receipts/certificates
+  isAnonymous      Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  createdById      String // Admin who recorded the donation
+  notes            String? // Internal notes about the donation
 
-  @@index([donorId])
-  @@index([hospitalId])
+  @@index([donorName])
+  @@index([donorPAN])
+  @@index([paymentDate])
+  @@index([receiptNumber])
 }
 
 model Plan {

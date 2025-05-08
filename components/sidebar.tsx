@@ -40,7 +40,7 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "flex h-screen flex-col border-r bg-card transition-all duration-300",
+        "flex h-screen flex-col border-r bg-card transition-all duration-300 sticky",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -113,6 +113,19 @@ export function Sidebar() {
                 <Heart className="h-4 w-4 text-white" fill="red" />
                 {!isCollapsed && "Donations"}
               </Link>
+              <Link
+                href="/agent/cards"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/agent/cards")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+                title="Cards"
+              >
+                <CreditCard className="h-4 w-4" />
+                {!isCollapsed && "Cards"}
+              </Link>
             </>
           )}
 
@@ -162,20 +175,6 @@ export function Sidebar() {
               >
                 <Home className="h-4 w-4" />
                 {!isCollapsed && "Households"}
-              </Link>
-
-              <Link
-                href="/agent/cards"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                  pathname.startsWith("/agent/cards")
-                    ? "bg-accent"
-                    : "transparent"
-                )}
-                title="Cards"
-              >
-                <CreditCard className="h-4 w-4" />
-                {!isCollapsed && "Cards"}
               </Link>
             </>
           )}

@@ -13,19 +13,6 @@ export async function GET(req: NextRequest) {
 
   try {
     const donations = await prisma.donation.findMany({
-      include: {
-        donor: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        hospital: {
-          select: {
-            name: true,
-          },
-        },
-      },
       orderBy: {
         createdAt: "desc",
       },
@@ -50,28 +37,48 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { type, amount, description, hospitalId } = body;
+    const {
+      donorName,
+      donorEmail,
+      donorPhone,
+      donorAddress,
+      donorType,
+      donorPAN,
+      organizationName,
+      type,
+      amount,
+      description,
+      paymentMethod,
+      paymentReference,
+      paymentDate,
+      isAnonymous,
+      notes,
+    } = body;
+
+    // Generate a unique receipt number
+    const receiptNumber = `DON-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`.toUpperCase();
 
     const donation = await prisma.donation.create({
       data: {
+        donorName,
+        donorEmail,
+        donorPhone,
+        donorAddress,
+        donorType,
+        donorPAN,
+        organizationName,
         type,
-        amount: amount ? parseFloat(amount) : null,
+        amount: parseFloat(amount),
         description,
-        donorId: session.user.id,
-        hospitalId,
-      },
-      include: {
-        donor: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        hospital: {
-          select: {
-            name: true,
-          },
-        },
+        paymentMethod,
+        paymentReference,
+        paymentDate: new Date(paymentDate),
+        receiptNumber,
+        isAnonymous,
+        notes,
+        createdById: session.user.id,
       },
     });
 

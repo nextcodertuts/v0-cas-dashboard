@@ -1,3 +1,4 @@
+// app/(admin)/admin/donations/new/page.tsx
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -5,8 +6,9 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -15,20 +17,7 @@ export async function GET(
 
   try {
     const donation = await prisma.donation.findUnique({
-      where: { id: params.id },
-      include: {
-        donor: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        hospital: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      where: { id: id },
     });
 
     if (!donation) {
@@ -50,8 +39,9 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -60,28 +50,42 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const { type, amount, description, hospitalId } = body;
+    const {
+      donorName,
+      donorEmail,
+      donorPhone,
+      donorAddress,
+      donorType,
+      donorPAN,
+      organizationName,
+      type,
+      amount,
+      description,
+      paymentMethod,
+      paymentReference,
+      paymentDate,
+      isAnonymous,
+      notes,
+    } = body;
 
     const donation = await prisma.donation.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
+        donorName,
+        donorEmail,
+        donorPhone,
+        donorAddress,
+        donorType,
+        donorPAN,
+        organizationName,
         type,
-        amount: amount ? parseFloat(amount) : null,
+        amount: parseFloat(amount),
         description,
-        hospitalId,
-      },
-      include: {
-        donor: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        hospital: {
-          select: {
-            name: true,
-          },
-        },
+        paymentMethod,
+        paymentReference,
+        paymentDate: new Date(paymentDate),
+        isAnonymous,
+        notes,
       },
     });
 
@@ -97,8 +101,9 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -107,7 +112,7 @@ export async function DELETE(
 
   try {
     await prisma.donation.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ success: true });

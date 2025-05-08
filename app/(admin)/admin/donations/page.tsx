@@ -28,21 +28,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal } from "lucide-react";
-import type { DonationType } from "@prisma/client";
+import type { DonationType, DonorType, PaymentMethod } from "@prisma/client";
 
 interface Donation {
   id: string;
+  donorName: string;
+  donorType: DonorType;
+  organizationName: string | null;
   type: DonationType;
-  amount: number | null;
-  description: string;
-  createdAt: string;
-  donor: {
-    name: string;
-    email: string;
-  };
-  hospital: {
-    name: string;
-  };
+  amount: number;
+  paymentMethod: PaymentMethod;
+  paymentDate: string;
+  receiptNumber: string;
+  isAnonymous: boolean;
 }
 
 export default function DonationsPage() {
@@ -86,8 +84,7 @@ export default function DonationsPage() {
     }
   };
 
-  const formatAmount = (amount: number | null) => {
-    if (amount === null) return "N/A";
+  const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
@@ -117,11 +114,11 @@ export default function DonationsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Receipt No.</TableHead>
+                  <TableHead>Donor</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Donor</TableHead>
-                  <TableHead>Hospital</TableHead>
+                  <TableHead>Payment Method</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -129,15 +126,21 @@ export default function DonationsPage() {
               <TableBody>
                 {donations.map((donation) => (
                   <TableRow key={donation.id}>
+                    <TableCell>{donation.receiptNumber}</TableCell>
+                    <TableCell>
+                      {donation.isAnonymous
+                        ? "Anonymous"
+                        : donation.donorType === "ORGANIZATION"
+                        ? donation.organizationName
+                        : donation.donorName}
+                    </TableCell>
                     <TableCell>
                       <Badge>{donation.type}</Badge>
                     </TableCell>
                     <TableCell>{formatAmount(donation.amount)}</TableCell>
-                    <TableCell>{donation.description}</TableCell>
-                    <TableCell>{donation.donor.name}</TableCell>
-                    <TableCell>{donation.hospital.name}</TableCell>
+                    <TableCell>{donation.paymentMethod}</TableCell>
                     <TableCell>
-                      {new Date(donation.createdAt).toLocaleDateString()}
+                      {new Date(donation.paymentDate).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
