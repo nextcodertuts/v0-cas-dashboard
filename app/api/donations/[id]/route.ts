@@ -1,0 +1,121 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    const donation = await prisma.donation.findUnique({
+      where: { id: params.id },
+      include: {
+        donor: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        hospital: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!donation) {
+      return NextResponse.json(
+        { error: "Donation not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(donation);
+  } catch (error) {
+    console.error("Error fetching donation:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch donation" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    const body = await req.json();
+    const { type, amount, description, hospitalId } = body;
+
+    const donation = await prisma.donation.update({
+      where: { id: params.id },
+      data: {
+        type,
+        amount: amount ? parseFloat(amount) : null,
+        description,
+        hospitalId,
+      },
+      include: {
+        donor: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        hospital: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(donation);
+  } catch (error) {
+    console.error("Error updating donation:", error);
+    return NextResponse.json(
+      { error: "Failed to update donation" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    await prisma.donation.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting donation:", error);
+    return NextResponse.json(
+      { error: "Failed to delete donation" },
+      { status: 500 }
+    );
+  }
+}

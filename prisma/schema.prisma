@@ -26,8 +26,17 @@ enum CardStatus {
 enum MemberRelation {
   HEAD
   SPOUSE
-  CHILD
-  PARENT
+  FATHER
+  MOTHER
+  SON
+  DAUGHTER
+  OTHER
+}
+
+enum DonationType {
+  MONETARY
+  MEDICAL_SUPPLIES
+  EQUIPMENT
   OTHER
 }
 
@@ -43,18 +52,36 @@ model User {
   updatedCards Card[]     @relation("UpdatedBy")
   auditLogs    AuditLog[]
   hospital     Hospital?  @relation("HospitalUser")
+  donations    Donation[]
 }
 
 model Hospital {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
   address   String
   phone     String
-  licenseNo String   @unique
-  user      User     @relation("HospitalUser", fields: [userId], references: [id])
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  licenseNo String     @unique
+  user      User       @relation("HospitalUser", fields: [userId], references: [id])
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  donations Donation[]
+}
+
+model Donation {
+  id          String       @id @default(cuid())
+  type        DonationType
+  amount      Decimal?     @db.Decimal(10, 2)
+  description String
+  donorId     String
+  hospitalId  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  donor       User         @relation(fields: [donorId], references: [id])
+  hospital    Hospital     @relation(fields: [hospitalId], references: [id])
+
+  @@index([donorId])
+  @@index([hospitalId])
 }
 
 model Plan {

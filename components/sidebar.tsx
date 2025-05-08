@@ -18,6 +18,7 @@ import {
   ClipboardList,
   HospitalIcon,
   Users,
+  Heart,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -99,6 +100,18 @@ export function Sidebar() {
               >
                 <Users className="h-4 w-4" />
                 {!isCollapsed && "Agents"}
+              </Link>
+              <Link
+                href="/admin/donations"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/donations")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+              >
+                <Heart className="h-4 w-4 text-white" fill="red" />
+                {!isCollapsed && "Donations"}
               </Link>
             </>
           )}
