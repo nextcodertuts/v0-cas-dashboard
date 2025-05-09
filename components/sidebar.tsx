@@ -19,6 +19,7 @@ import {
   HospitalIcon,
   Users,
   Heart,
+  Activity,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -159,6 +160,19 @@ export function Sidebar() {
               >
                 <Search className="h-4 w-4" />
                 {!isCollapsed && "Card Lookup"}
+              </Link>
+              <Link
+                href="/hospital/beneficiaries"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/hospital/beneficiaries")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+                title="Beneficiaries"
+              >
+                <Activity className="h-4 w-4 text-blue-400" />
+                {!isCollapsed && "Beneficiaries"}
               </Link>
             </>
           )}
