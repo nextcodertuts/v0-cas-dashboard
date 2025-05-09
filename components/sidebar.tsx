@@ -38,6 +38,19 @@ export function Sidebar() {
   const isOfficeAgent = role === "OFFICE_AGENT";
   const isHospitalUser = role === "HOSPITAL_USER" || isOfficeAgent || isAdmin;
 
+  const getSettingsPath = () => {
+    switch (role) {
+      case "ADMIN":
+        return "/admin/settings";
+      case "OFFICE_AGENT":
+        return "/agent/settings";
+      case "HOSPITAL_USER":
+        return "/hospital/settings";
+      default:
+        return "/settings";
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -222,20 +235,20 @@ export function Sidebar() {
                 <FileText className="h-4 w-4" />
                 {!isCollapsed && "Audit Logs"}
               </Link>
-
-              <Link
-                href="/admin/settings"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                  pathname === "/admin/settings" ? "bg-accent" : "transparent"
-                )}
-                title="Settings"
-              >
-                <Settings className="h-4 w-4" />
-                {!isCollapsed && "Settings"}
-              </Link>
             </>
           )}
+
+          <Link
+            href={getSettingsPath()}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              pathname.endsWith("/settings") ? "bg-accent" : "transparent"
+            )}
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+            {!isCollapsed && "Settings"}
+          </Link>
         </nav>
       </div>
 
