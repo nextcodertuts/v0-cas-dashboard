@@ -9,8 +9,9 @@ import type { CardStatus } from "@prisma/client";
 // GET a single card
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -19,7 +20,7 @@ export async function GET(
 
   try {
     const card = await prisma.card.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         household: {
           include: {
@@ -47,8 +48,9 @@ export async function GET(
 // UPDATE a card
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (
@@ -78,7 +80,7 @@ export async function PUT(
 
     // Update the card
     const card = await prisma.card.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         planId,
         status: status as CardStatus,
@@ -115,8 +117,9 @@ export async function PUT(
 // DELETE a card
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (
@@ -128,7 +131,7 @@ export async function DELETE(
 
   try {
     const card = await prisma.card.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     // Create audit log
@@ -137,7 +140,7 @@ export async function DELETE(
         userId: session.user.id,
         action: "CARD_DELETED",
         metadata: {
-          cardId: params.id,
+          cardId: id,
         },
       },
     });
