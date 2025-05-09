@@ -13,6 +13,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useSession } from "next-auth/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { BenefitStatus, BenefitType } from "@prisma/client";
 
 interface Beneficiary {
@@ -45,8 +54,13 @@ interface Beneficiary {
 export default function BeneficiaryDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const { data: session } = useSession();
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isAdmin = session?.user?.role === "ADMIN";
 
   useEffect(() => {
     fetchBeneficiaryDetails();
@@ -63,6 +77,36 @@ export default function BeneficiaryDetailsPage() {
       console.error("Error fetching beneficiary details:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: BenefitStatus) => {
+    if (!beneficiary) return;
+    setIsUpdating(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/beneficiaries/${params.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...beneficiary,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      const updatedBeneficiary = await response.json();
+      setBeneficiary(updatedBeneficiary);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update status");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -108,7 +152,7 @@ export default function BeneficiaryDetailsPage() {
           <Button
             variant="outline"
             onClick={() =>
-              router.push(`/hospital/beneficiaries/${params.id}/edit`)
+              router.push(`/admin/beneficiaries/${params.id}/edit`)
             }
           >
             Edit Beneficiary
@@ -135,9 +179,36 @@ export default function BeneficiaryDetailsPage() {
               <p className="text-sm font-medium text-muted-foreground">
                 Status
               </p>
-              <Badge className={getStatusColor(beneficiary.status)}>
-                {beneficiary.status}
-              </Badge>
+              {isAdmin ? (
+                <div className="flex items-center gap-4">
+                  <Select
+                    value={beneficiary.status}
+                    onValueChange={(value) =>
+                      handleStatusChange(value as BenefitStatus)
+                    }
+                    disabled={isUpdating}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="APPROVED">Approved</SelectItem>
+                      <SelectItem value="REJECTED">Rejected</SelectItem>
+                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {error && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              ) : (
+                <Badge className={getStatusColor(beneficiary.status)}>
+                  {beneficiary.status}
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">

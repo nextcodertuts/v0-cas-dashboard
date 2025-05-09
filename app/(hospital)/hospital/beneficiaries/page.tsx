@@ -198,7 +198,7 @@ export default function BeneficiariesPage() {
                           <DropdownMenuItem
                             onClick={() =>
                               router.push(
-                                `/hospital/beneficiaries/${beneficiary.id}`
+                                `/admin/beneficiaries/${beneficiary.id}`
                               )
                             }
                           >
