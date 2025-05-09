@@ -54,19 +54,36 @@ enum DonorType {
   ORGANIZATION
 }
 
+enum BenefitType {
+  MEDICAL_CHECKUP
+  HOSPITALIZATION
+  SURGERY
+  MEDICATION
+  CONSULTATION
+  OTHER
+}
+
+enum BenefitStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
 model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  name         String
-  passwordHash String
-  role         UserRole
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  createdCards Card[]      @relation("CreatedBy")
-  updatedCards Card[]      @relation("UpdatedBy")
-  auditLogs    AuditLog[]
-  hospital     Hospital?   @relation("HospitalUser")
-  households   Household[] @relation("CreatedBy")
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  passwordHash  String
+  role          UserRole
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdCards  Card[]        @relation("CreatedBy")
+  updatedCards  Card[]        @relation("UpdatedBy")
+  auditLogs     AuditLog[]
+  hospital      Hospital?     @relation("HospitalUser")
+  households    Household[]   @relation("CreatedBy")
+  beneficiaries Beneficiary[] @relation("CreatedBy")
 }
 
 model Hospital {
@@ -121,51 +138,54 @@ model Plan {
 }
 
 model Household {
-  id          String   @id @default(cuid())
-  headName    String
-  address     String
-  phone       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  members     Member[]
-  card        Card?
-  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
-  createdById String
+  id            String        @id @default(cuid())
+  headName      String
+  address       String
+  phone         String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  members       Member[]
+  card          Card?
+  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById   String
+  beneficiaries Beneficiary[]
 
   @@index([createdById])
 }
 
 model Member {
-  id          String         @id @default(cuid())
-  householdId String
-  firstName   String
-  lastName    String
-  dob         DateTime
-  aadhaarNo   String         @unique
-  relation    MemberRelation
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  household   Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  householdId   String
+  firstName     String
+  lastName      String
+  dob           DateTime
+  aadhaarNo     String         @unique
+  relation      MemberRelation
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  household     Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  beneficiaries Beneficiary[]  @relation("BeneficiaryMembers")
 
   @@index([householdId])
 }
 
 model Card {
-  id          String     @id @default(cuid())
-  householdId String     @unique
-  planId      String
-  status      CardStatus
-  issueDate   DateTime
-  expiryDate  DateTime
-  createdById String
-  updatedById String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  plan        Plan       @relation(fields: [planId], references: [id])
-  createdBy   User       @relation("CreatedBy", fields: [createdById], references: [id])
-  updatedBy   User       @relation("UpdatedBy", fields: [updatedById], references: [id])
-  auditLogs   AuditLog[]
+  id            String        @id @default(cuid())
+  householdId   String        @unique
+  planId        String
+  status        CardStatus
+  issueDate     DateTime
+  expiryDate    DateTime
+  createdById   String
+  updatedById   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  household     Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  plan          Plan          @relation(fields: [planId], references: [id])
+  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedBy     User          @relation("UpdatedBy", fields: [updatedById], references: [id])
+  auditLogs     AuditLog[]
+  beneficiaries Beneficiary[]
 
   @@index([planId])
   @@index([createdById])
@@ -184,4 +204,27 @@ model AuditLog {
 
   @@index([userId])
   @@index([cardId])
+}
+
+model Beneficiary {
+  id          String        @id @default(cuid())
+  householdId String
+  cardId      String
+  benefitType BenefitType
+  status      BenefitStatus @default(PENDING)
+  amount      Decimal       @db.Decimal(10, 2)
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  household   Household     @relation(fields: [householdId], references: [id])
+  card        Card          @relation(fields: [cardId], references: [id])
+  createdBy   User          @relation("CreatedBy", fields: [createdById], references: [id])
+  members     Member[]      @relation("BeneficiaryMembers")
+
+  @@index([householdId])
+  @@index([cardId])
+  @@index([createdById])
 }
