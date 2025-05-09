@@ -252,7 +252,7 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="border-t p-4">
+      <div className="border-t p-4 bg-linear-to-r from-cyan-500 to-blue-500">
         <UserNav isCollapsed={isCollapsed} />
       </div>
     </div>

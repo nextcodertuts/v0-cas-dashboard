@@ -69,7 +69,8 @@ export default function HospitalLookup() {
       }
 
       const data = await response.json();
-      setCardDetails(data);
+
+      setCardDetails(data[0]);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An error occurred while searching"
