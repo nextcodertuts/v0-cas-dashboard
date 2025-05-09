@@ -79,11 +79,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    (session.user.role !== "ADMIN" && session.user.role !== "OFFICE_AGENT")
-  ) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -99,11 +96,20 @@ export async function POST(req: NextRequest) {
       memberIds,
     } = body;
 
+    // Validate required fields
+    if (!householdId || !cardId || !memberIds?.length) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
     // Validate the card belongs to the household
     const card = await prisma.card.findFirst({
       where: {
         id: cardId,
         householdId: householdId,
+        status: "ACTIVE",
       },
     });
 

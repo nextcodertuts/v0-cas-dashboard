@@ -1,56 +1,80 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+
+import type React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+
 import type { BenefitType } from "@prisma/client";
+import { CardWithDetails, FormData } from "@/components/beneficiary/types";
+import SearchCardSection from "@/components/beneficiary/search-card-section";
+import MemberSelectionSection from "@/components/beneficiary/member-selection-section";
+import BenefitDetailsForm from "@/components/beneficiary/benefit-details-form";
 
 export default function NewBeneficiaryPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [cardId, setCardId] = useState("");
-  const [benefitType, setBenefitType] =
-    useState<BenefitType>("MEDICAL_CHECKUP");
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [selectedCard, setSelectedCard] = useState<CardWithDetails | null>(
+    null
+  );
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    benefitType: "MEDICAL_CHECKUP",
+    amount: "",
+    description: "",
+    startDate: new Date(),
+    endDate: undefined,
+  });
+
+  const handleCardSelect = (card: CardWithDetails) => {
+    setSelectedCard(card);
+    setSelectedMembers([]); // Reset selected members when card changes
+  };
+
+  const handleMemberToggle = (memberId: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(memberId)
+        ? prev.filter((id) => id !== memberId)
+        : [...prev, memberId]
+    );
+  };
+
+  const handleFormChange = (
+    field: keyof FormData,
+    value: string | Date | BenefitType | undefined
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (!selectedCard) {
+      setError("Please select a valid card");
+      setIsLoading(false);
+      return;
+    }
+
+    if (selectedMembers.length === 0) {
+      setError("Please select at least one member");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/beneficiaries", {
@@ -59,12 +83,13 @@ export default function NewBeneficiaryPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cardId,
-          benefitType,
-          amount: parseFloat(amount),
-          description,
-          startDate,
-          endDate,
+          householdId: selectedCard.household.id,
+          cardId: selectedCard.id,
+          benefitType: formData.benefitType,
+          amount: Number.parseFloat(formData.amount),
+          description: formData.description,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
           memberIds: selectedMembers,
         }),
       });
@@ -105,124 +130,24 @@ export default function NewBeneficiaryPage() {
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="cardId">Card ID</Label>
-              <Input
-                id="cardId"
-                value={cardId}
-                onChange={(e) => setCardId(e.target.value)}
-                required
-              />
+            <div className="space-y-4">
+              <SearchCardSection onCardSelect={handleCardSelect} />
+
+              {selectedCard && (
+                <MemberSelectionSection
+                  members={selectedCard.household.members}
+                  selectedMembers={selectedMembers}
+                  onMemberToggle={handleMemberToggle}
+                />
+              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="benefitType">Benefit Type</Label>
-              <Select
-                value={benefitType}
-                onValueChange={(value) => setBenefitType(value as BenefitType)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select benefit type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEDICAL_CHECKUP">
-                    Medical Checkup
-                  </SelectItem>
-                  <SelectItem value="HOSPITALIZATION">
-                    Hospitalization
-                  </SelectItem>
-                  <SelectItem value="SURGERY">Surgery</SelectItem>
-                  <SelectItem value="MEDICATION">Medication</SelectItem>
-                  <SelectItem value="CONSULTATION">Consultation</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount (₹)</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? (
-                      format(startDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={(date) => date && setStartDate(date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="endDate">End Date (Optional)</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? (
-                      format(endDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={(date) => setEndDate(date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+            <BenefitDetailsForm
+              formData={formData}
+              onChange={handleFormChange}
+            />
           </CardContent>
-          <CardFooter className="flex justify-between">
+          <div className="flex justify-between p-6 pt-0">
             <Button
               variant="outline"
               type="button"
@@ -233,7 +158,7 @@ export default function NewBeneficiaryPage() {
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Creating..." : "Create Beneficiary"}
             </Button>
-          </CardFooter>
+          </div>
         </Card>
       </form>
     </div>

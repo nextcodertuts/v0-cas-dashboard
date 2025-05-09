@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -13,6 +14,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query");
+    const status = searchParams.get("status") || "ACTIVE";
 
     if (!query) {
       return NextResponse.json(
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Search by phone number or Aadhaar number
-    const card = await prisma.card.findFirst({
+    const cards = await prisma.card.findMany({
       where: {
         OR: [
           {
@@ -40,6 +42,7 @@ export async function GET(req: NextRequest) {
             },
           },
         ],
+        status: status as any,
       },
       include: {
         household: {
@@ -51,15 +54,15 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (!card) {
-      return NextResponse.json({ error: "Card not found" }, { status: 404 });
+    if (cards.length === 0) {
+      return NextResponse.json({ error: "No cards found" }, { status: 404 });
     }
 
-    return NextResponse.json(card);
+    return NextResponse.json(cards);
   } catch (error) {
-    console.error("Error looking up card:", error);
+    console.error("Error looking up cards:", error);
     return NextResponse.json(
-      { error: "Failed to lookup card" },
+      { error: "Failed to lookup cards" },
       { status: 500 }
     );
   }
