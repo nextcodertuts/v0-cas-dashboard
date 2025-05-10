@@ -22,6 +22,25 @@ async function createAuditLog(
   });
 }
 
+// Helper function to generate unique 8-digit card number
+async function generateUniqueCardNumber(): Promise<string> {
+  while (true) {
+    // Generate a random 8-digit number
+    const cardNumber = Math.floor(
+      10000000 + Math.random() * 90000000
+    ).toString();
+
+    // Check if it exists
+    const existingCard = await prisma.card.findUnique({
+      where: { cardNumber },
+    });
+
+    if (!existingCard) {
+      return cardNumber;
+    }
+  }
+}
+
 // GET all cards (with filtering)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -141,6 +160,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
 
+    // Generate unique card number
+    const cardNumber = await generateUniqueCardNumber();
+
     // Calculate expiry date
     const issueDateObj = new Date(issueDate);
     const expiryDate = new Date(issueDateObj);
@@ -149,6 +171,7 @@ export async function POST(req: NextRequest) {
     // Create the card
     const card = await prisma.card.create({
       data: {
+        cardNumber,
         householdId,
         planId,
         status: status || "ACTIVE",
@@ -164,6 +187,7 @@ export async function POST(req: NextRequest) {
       householdId,
       planId,
       status,
+      cardNumber,
     });
 
     return NextResponse.json(card, { status: 201 });

@@ -335,8 +335,10 @@ export default function NewHouseholdPage() {
                           <SelectContent>
                             <SelectItem value="HEAD">Head</SelectItem>
                             <SelectItem value="SPOUSE">Spouse</SelectItem>
-                            <SelectItem value="CHILD">Child</SelectItem>
-                            <SelectItem value="PARENT">Parent</SelectItem>
+                            <SelectItem value="FATHER">Father</SelectItem>
+                            <SelectItem value="MOTHER">Mother</SelectItem>
+                            <SelectItem value="SON">Son</SelectItem>
+                            <SelectItem value="DAUGHTER">Daughter</SelectItem>
                             <SelectItem value="OTHER">Other</SelectItem>
                           </SelectContent>
                         </Select>

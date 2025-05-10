@@ -74,6 +74,7 @@ model User {
   id            String        @id @default(cuid())
   email         String        @unique
   name          String
+  phone         String?
   passwordHash  String
   role          UserRole
   createdAt     DateTime      @default(now())
@@ -171,6 +172,7 @@ model Member {
 
 model Card {
   id            String        @id @default(cuid())
+  cardNumber    String        @unique // 8-digit unique card number
   householdId   String        @unique
   planId        String
   status        CardStatus
@@ -187,6 +189,7 @@ model Card {
   auditLogs     AuditLog[]
   beneficiaries Beneficiary[]
 
+  @@index([cardNumber])
   @@index([planId])
   @@index([createdById])
   @@index([updatedById])

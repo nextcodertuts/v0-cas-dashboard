@@ -1,13 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,84 +28,88 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { Plus, MoreHorizontal, Search } from "lucide-react"
-import type { CardStatus } from "@prisma/client"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Plus, MoreHorizontal, Search, Printer } from "lucide-react";
+import type { CardStatus } from "@prisma/client";
 
 interface CardProps {
-  id: string
-  status: CardStatus
-  issueDate: string
-  expiryDate: string
+  id: string;
+  status: CardStatus;
+  issueDate: string;
+  expiryDate: string;
   household: {
-    id: string
-    headName: string
-    phone: string
-  }
+    id: string;
+    headName: string;
+    phone: string;
+  };
   plan: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
 }
 
 export default function CardsPage() {
-  const router = useRouter()
-  const [cards, setCards] = useState<CardProps[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter();
+  const [cards, setCards] = useState<CardProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetchCards()
-  }, [])
+    fetchCards();
+  }, []);
 
   const fetchCards = async (search?: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const queryParams = new URLSearchParams()
+      const queryParams = new URLSearchParams();
       if (search) {
-        queryParams.append("search", search)
+        queryParams.append("search", search);
       }
 
-      const response = await fetch(`/api/cards?${queryParams.toString()}`)
-      if (!response.ok) throw new Error("Failed to fetch cards")
+      const response = await fetch(`/api/cards?${queryParams.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch cards");
 
-      const data = await response.json()
-      setCards(data)
+      const data = await response.json();
+      setCards(data);
     } catch (error) {
-      console.error("Error fetching cards:", error)
+      console.error("Error fetching cards:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    fetchCards(searchQuery)
-  }
+    e.preventDefault();
+    fetchCards(searchQuery);
+  };
 
   const getStatusColor = (status: CardStatus) => {
     switch (status) {
       case "ACTIVE":
-        return "bg-green-500"
+        return "bg-green-500";
       case "SUSPENDED":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "EXPIRED":
-        return "bg-red-500"
+        return "bg-red-500";
       case "CANCELLED":
-        return "bg-gray-500"
+        return "bg-gray-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
+    return new Date(dateString).toLocaleDateString();
+  };
 
   const handleViewDetails = (id: string) => {
-    router.push(`/agent/cards/${id}`)
-  }
+    router.push(`/agent/cards/${id}`);
+  };
+
+  const handlePrintCard = (id: string) => {
+    router.push(`/agent/cards/${id}/print`);
+  };
 
   return (
     <div className="space-y-4">
@@ -109,8 +126,15 @@ export default function CardsPage() {
           <CardDescription>View and manage all health cards</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2 mb-4">
-            <Input placeholder="Search cards..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <form
+            onSubmit={handleSearch}
+            className="flex w-full max-w-sm items-center space-x-2 mb-4"
+          >
+            <Input
+              placeholder="Search cards..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <Button type="submit">
               <Search className="h-4 w-4" />
             </Button>
@@ -135,10 +159,14 @@ export default function CardsPage() {
               <TableBody>
                 {cards.map((card) => (
                   <TableRow key={card.id}>
-                    <TableCell className="font-medium">{card.household.headName}</TableCell>
+                    <TableCell className="font-medium">
+                      {card.household.headName}
+                    </TableCell>
                     <TableCell>{card.plan.name}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(card.status)}>{card.status}</Badge>
+                      <Badge className={getStatusColor(card.status)}>
+                        {card.status}
+                      </Badge>
                     </TableCell>
                     <TableCell>{formatDate(card.issueDate)}</TableCell>
                     <TableCell>{formatDate(card.expiryDate)}</TableCell>
@@ -152,9 +180,23 @@ export default function CardsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleViewDetails(card.id)}>View details</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleViewDetails(card.id)}
+                          >
+                            View details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handlePrintCard(card.id)}
+                          >
+                            <Printer className="h-4 w-4 mr-2" />
+                            Print card
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => router.push(`/agent/cards/${card.id}/edit`)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(`/agent/cards/${card.id}/edit`)
+                            }
+                          >
                             Edit card
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -168,5 +210,5 @@ export default function CardsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
