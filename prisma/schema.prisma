@@ -85,6 +85,11 @@ model User {
   hospital      Hospital?     @relation("HospitalUser")
   households    Household[]   @relation("CreatedBy")
   beneficiaries Beneficiary[] @relation("CreatedBy")
+  teamLeader    User?         @relation("TeamMembers", fields: [teamLeaderId], references: [id])
+  teamLeaderId  String?
+  teamMembers   User[]        @relation("TeamMembers")
+
+  @@index([teamLeaderId])
 }
 
 model Hospital {
@@ -172,7 +177,7 @@ model Member {
 
 model Card {
   id            String        @id @default(cuid())
-  cardNumber    String        @unique // 8-digit unique card number
+  cardNumber    String        @unique // 16-digit unique card number
   householdId   String        @unique
   planId        String
   status        CardStatus

@@ -208,14 +208,6 @@ export default function NewHouseholdPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Members</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddMember}
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add Member
-                </Button>
               </div>
 
               <div className="space-y-6">
@@ -294,7 +286,11 @@ export default function NewHouseholdPage() {
                               onSelect={(date) =>
                                 handleMemberChange(index, "dob", date)
                               }
-                              initialFocus
+                              fromYear={1900}
+                              toYear={new Date().getFullYear()}
+                              captionLayout="dropdown"
+                              defaultMonth={member.dob ?? new Date(1990, 0, 1)}
+                              disabled={(date) => date > new Date()}
                             />
                           </PopoverContent>
                         </Popover>
@@ -346,6 +342,16 @@ export default function NewHouseholdPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="flex justify-end mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddMember}
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add Member
+                </Button>
               </div>
             </div>
           </CardContent>

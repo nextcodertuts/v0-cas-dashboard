@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ interface CardDetails {
   status: string;
   issueDate: string;
   expiryDate: string;
+  cardNumber: string;
   household: {
     headName: string;
     phone: string;
@@ -81,7 +83,7 @@ export default function PrintCardPage() {
         </CardHeader>
         <CardContent>
           <HelpCard
-            cardId={card.id}
+            cardId={card.cardNumber}
             issueDate={new Date(card.issueDate)}
             expiryDate={new Date(card.expiryDate)}
             headName={card.household.headName}

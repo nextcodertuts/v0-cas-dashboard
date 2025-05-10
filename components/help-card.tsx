@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Mail, MapPin, Calendar, Users } from "lucide-react";
+import { Phone, Mail, MapPin, Users } from "lucide-react";
 import Image from "next/image";
 
 interface Member {
@@ -23,7 +23,6 @@ interface HelpCardProps {
 
 export default function HelpCard({
   cardId,
-  issueDate,
   expiryDate,
   phone,
   address,
@@ -40,8 +39,15 @@ export default function HelpCard({
   return (
     <div className="space-y-4 w-full max-w-[420px] mx-auto">
       {/* Front Side */}
-      <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg">
-        <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 h-full p-2 flex flex-col">
+      <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative">
+        <div className="bg-gradient-to-br from-lime-900 via-lime-700 to-lime-900 h-full p-2 flex flex-col relative z-10">
+          <Image
+            src="/3hand.png" // You can change this dynamically
+            alt="Card"
+            layout="fill"
+            objectFit="cover"
+            className="opacity-40"
+          />
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-white text-sm font-bold tracking-wide mt-1">
@@ -59,19 +65,21 @@ export default function HelpCard({
             </div>
           </div>
 
-          <div className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-1">
-            <p className="text-blue-100 text-xl">{cardId}</p>
+          <div className="">
+            <p className="text-lime-100 text-2xl font-mono tracking-widest">
+              {cardId.replace(/(.{4})/g, "$1 ").trim()}
+            </p>
           </div>
 
-          <div className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-1 flex-grow overflow-y-auto">
+          <div className="mt-2 bg-white/10 backdrop-blur-[1px] rounded-lg p-2 flex-grow overflow-y-auto">
             <div className="flex items-center gap-2 mb-1">
-              <Users className="text-blue-100 h-3 w-3" />
+              <Users className="text-lime-200 h-3 w-3" />
               <h3 className="text-white font-medium text-[11px]">MEMBERS</h3>
             </div>
             <div className="grid grid-cols-3 gap-x-2 gap-y-0.5">
               {members.map((member, index) => (
-                <div key={index} className="text-[10px]">
-                  <p className="text-white font-medium leading-tight">
+                <div key={index} className="">
+                  <p className="text-white text-[9px] font-medium leading-tight">
                     {member.firstName} {member.lastName}
                   </p>
                   <p className="text-blue-100 text-[7px] leading-tight">
@@ -82,20 +90,13 @@ export default function HelpCard({
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between text-[10px]">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1.5">
-              <div className="flex items-center gap-1">
-                <Calendar className="text-blue-100 h-3 w-3" />
-                <p className="text-blue-100">Valid From:</p>
-              </div>
-              <p className="text-white font-medium">{formatDate(issueDate)}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1.5">
-              <div className="flex items-center gap-1">
-                <Calendar className="text-blue-100 h-3 w-3" />
-                <p className="text-blue-100">Valid Thru:</p>
-              </div>
-              <p className="text-white font-medium">{formatDate(expiryDate)}</p>
+          <div className="mt-2 flex justify-between text-[11px]">
+            <div className="bg-white/10 backdrop-blur-sm font-mono flex space-x-1 rounded-lg p-1.5">
+              <p className="text-lime-100">Expires On:</p>
+
+              <p className="text-white text-end  font-medium">
+                {formatDate(expiryDate)}
+              </p>
             </div>
           </div>
         </div>

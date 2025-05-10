@@ -22,7 +22,14 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         email: true,
+        phone: true,
         createdAt: true,
+        teamLeader: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -45,7 +52,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, email, password } = body;
+    const { name, email, phone, password, teamLeaderId } = body;
 
     // Hash the password
     const passwordHash = await hash(password, 10);
@@ -54,13 +61,16 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         email,
+        phone,
         passwordHash,
         role: "OFFICE_AGENT",
+        teamLeaderId: teamLeaderId || null,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        phone: true,
         createdAt: true,
       },
     });

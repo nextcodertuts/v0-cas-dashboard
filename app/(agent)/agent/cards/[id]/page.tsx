@@ -14,12 +14,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { CardStatus } from "@prisma/client";
+import { Printer } from "lucide-react";
 
 interface CardDetails {
   id: string;
   status: CardStatus;
   issueDate: string;
   expiryDate: string;
+  cardNumber: string;
   household: {
     id: string;
     headName: string;
@@ -52,6 +54,10 @@ export default function CardDetailsPage() {
   useEffect(() => {
     fetchCardDetails();
   }, []);
+
+  const handlePrintCard = (id: string) => {
+    router.push(`/agent/cards/${id}/print`);
+  };
 
   const fetchCardDetails = async () => {
     try {
@@ -95,6 +101,10 @@ export default function CardDetailsPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Card Details</h2>
         <div className="flex gap-2">
+          <Button onClick={() => handlePrintCard(card.id)}>
+            <Printer className="h-4 w-4 mr-2" />
+            Print card
+          </Button>
           <Button
             variant="outline"
             onClick={() => router.push(`/agent/cards/${params.id}/edit`)}
@@ -113,6 +123,9 @@ export default function CardDetailsPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p>{card.cardNumber}</p>
+            </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">
                 Status

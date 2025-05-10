@@ -25,10 +25,10 @@ async function createAuditLog(
 // Helper function to generate unique 8-digit card number
 async function generateUniqueCardNumber(): Promise<string> {
   while (true) {
-    // Generate a random 8-digit number
-    const cardNumber = Math.floor(
-      10000000 + Math.random() * 90000000
-    ).toString();
+    // Generate a 16-digit number as a string
+    const cardNumber = Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 10)
+    ).join("");
 
     // Check if it exists
     const existingCard = await prisma.card.findUnique({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,15 +14,45 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface TeamLeader {
+  id: string;
+  name: string;
+}
 
 export default function NewAgentPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [teamLeaders, setTeamLeaders] = useState<TeamLeader[]>([]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [teamLeaderId, setTeamLeaderId] = useState<string>("");
+
+  useEffect(() => {
+    fetchTeamLeaders();
+  }, []);
+
+  const fetchTeamLeaders = async () => {
+    try {
+      const response = await fetch("/api/agents?role=OFFICE_AGENT");
+      if (!response.ok) throw new Error("Failed to fetch team leaders");
+      const data = await response.json();
+      setTeamLeaders(data);
+    } catch (error) {
+      console.error("Error fetching team leaders:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +68,9 @@ export default function NewAgentPage() {
         body: JSON.stringify({
           name,
           email,
+          phone,
           password,
+          teamLeaderId: teamLeaderId || undefined,
         }),
       });
 
@@ -100,6 +132,17 @@ export default function NewAgentPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -108,6 +151,23 @@ export default function NewAgentPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="teamLeader">Team Leader (Optional)</Label>
+              <Select value={teamLeaderId} onValueChange={setTeamLeaderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a team leader" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="null">None</SelectItem>
+                  {teamLeaders.map((leader) => (
+                    <SelectItem key={leader.id} value={leader.id}>
+                      {leader.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
