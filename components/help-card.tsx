@@ -1,7 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Phone, Mail, MapPin, Users } from "lucide-react";
 import Image from "next/image";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 
 interface Member {
   firstName: string;
@@ -28,6 +31,29 @@ export default function HelpCard({
   address,
   members,
 }: HelpCardProps) {
+  const [qrCode, setQrCode] = useState<string>("");
+
+  useEffect(() => {
+    generateQRCode();
+  }, [cardId]);
+
+  const generateQRCode = async () => {
+    try {
+      const url = `${window.location.origin}/cards/${cardId}`;
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 128,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      });
+      setQrCode(qrDataUrl);
+    } catch (err) {
+      console.error("Error generating QR code:", err);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -42,7 +68,7 @@ export default function HelpCard({
       <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative">
         <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col relative z-10">
           <Image
-            src="/card-2.png" // You can change this dynamically
+            src="/card-2.png"
             alt="Card"
             layout="fill"
             objectFit="cover"
@@ -93,17 +119,18 @@ export default function HelpCard({
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between ">
+          <div className="mt-2 flex justify-between">
             <div className="bg-white/10 backdrop-blur-sm font-mono flex items-center space-x-1 rounded-lg p-1.5">
               <p className="text-blue-100 text-[11px]">Valid Upto:</p>
-
               <p className="text-lime-400 text-end font-semibold">
                 {formatDate(expiryDate)}
               </p>
             </div>
-            <div className="bg-white rounded-md z-50">
-              <Image src="/QR.svg" width={35} height={30} alt="qr image" />
-            </div>
+            {qrCode && (
+              <div className="bg-white rounded-md z-50">
+                <Image src={qrCode} width={40} height={40} alt="QR Code" />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -112,7 +139,7 @@ export default function HelpCard({
       <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative">
         <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col justify-center relative z-10">
           <Image
-            src="/card-2.png" // You can change this dynamically
+            src="/card-2.png"
             alt="Card"
             layout="fill"
             objectFit="cover"
@@ -167,7 +194,7 @@ export default function HelpCard({
               </div>
             </div>
           </div>
-          <div className=" text-center text-[10px] mt-4 z-50 opacity-60">
+          <div className="text-center text-[10px] mt-4 z-50 opacity-60">
             <p className="font-bold">This card for NGO members.</p>
             <p className="font-bold">
               There have no similarities with government scheme.

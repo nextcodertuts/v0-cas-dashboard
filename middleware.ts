@@ -32,6 +32,14 @@ export default async function middleware(req: NextRequestWithAuth) {
       return NextResponse.next();
     }
 
+    // Allow public card API and search API for everyone
+    if (
+      pathname.startsWith("/api/cards/public/") ||
+      pathname.startsWith("/api/cards/public/search")
+    ) {
+      return NextResponse.next();
+    }
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
