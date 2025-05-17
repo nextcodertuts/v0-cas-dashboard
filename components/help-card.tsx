@@ -40,40 +40,43 @@ export default function HelpCard({
     <div className="space-y-4 w-full max-w-[420px] mx-auto">
       {/* Front Side */}
       <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative">
-        <div className="bg-gradient-to-br from-lime-900 via-lime-700 to-lime-900 h-full p-2 flex flex-col relative z-10">
+        <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col relative z-10">
           <Image
-            src="/3hand.png" // You can change this dynamically
+            src="/card-2.png" // You can change this dynamically
             alt="Card"
             layout="fill"
             objectFit="cover"
-            className="opacity-40"
+            className="opacity-45"
           />
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start z-50">
             <div>
-              <h1 className="text-white text-sm font-bold tracking-wide mt-1">
-                CHAKDULALPUR ARUNADAY SANGHA
+              <h1 className="text-lime-400 text-xl font-bold tracking-wide mt-1">
+                CAS <span className="text-xs text-white">Members</span>
               </h1>
-              <p className="text-blue-100 text-[9px]">MEMBER CARE NETWORK</p>
+              <p className="text-white text-[9px] -mt-1 ml-[1px]">
+                CARE NETWORK
+              </p>
             </div>
-            <div className="">
+            <div className="z-50">
               <Image
                 src="/help-card-next.png"
                 width={45}
                 height={45}
                 alt="HelpCard"
+                className="z-50"
               />
             </div>
           </div>
 
-          <div className="">
-            <p className="text-lime-100 text-2xl font-mono tracking-widest">
+          <div className="z-50">
+            <p className="text-lime-400 text-2xl font-mono font-bold tracking-widest">
               {cardId.replace(/(.{4})/g, "$1 ").trim()}
             </p>
           </div>
 
           <div className="mt-2 bg-white/10 backdrop-blur-[1px] rounded-lg p-2 flex-grow overflow-y-auto">
             <div className="flex items-center gap-2 mb-1">
-              <Users className="text-lime-200 h-3 w-3" />
+              <Users className="text-blue-200 h-3 w-3" />
               <h3 className="text-white font-medium text-[11px]">MEMBERS</h3>
             </div>
             <div className="grid grid-cols-3 gap-x-2 gap-y-0.5">
@@ -90,31 +93,40 @@ export default function HelpCard({
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between text-[11px]">
-            <div className="bg-white/10 backdrop-blur-sm font-mono flex space-x-1 rounded-lg p-1.5">
-              <p className="text-lime-100">Expires On:</p>
+          <div className="mt-2 flex justify-between ">
+            <div className="bg-white/10 backdrop-blur-sm font-mono flex items-center space-x-1 rounded-lg p-1.5">
+              <p className="text-blue-100 text-[11px]">Valid Upto:</p>
 
-              <p className="text-white text-end  font-medium">
+              <p className="text-lime-400 text-end font-semibold">
                 {formatDate(expiryDate)}
               </p>
+            </div>
+            <div className="bg-white rounded-md z-50">
+              <Image src="/QR.svg" width={35} height={30} alt="qr image" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Back Side */}
-      <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg">
-        <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 h-full p-2 flex flex-col">
-          <div className="flex justify-between items-start">
+      <div className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative">
+        <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col justify-center relative z-10">
+          <Image
+            src="/card-2.png" // You can change this dynamically
+            alt="Card"
+            layout="fill"
+            objectFit="cover"
+            className="opacity-45"
+          />
+          <div className="flex justify-between items-start z-50">
             <div>
-              <h1 className="text-white font-bold tracking-wide">
+              <h1 className="text-white text-sm font-bold tracking-wide">
                 CHAKDULALPUR ARUNADAY SANGHA
               </h1>
-              <p className="text-blue-100 text-[10px]">MEMBER CARE NETWORK</p>
             </div>
           </div>
 
-          <div className="mt-1 bg-white/10 backdrop-blur-sm rounded-lg p-2">
+          <div className="z-50 mt-1 bg-white/10 backdrop-blur-sm rounded-lg p-2">
             <h2 className="text-white text-[10px] font-medium mb-2">
               CONTACT INFORMATION
             </h2>
@@ -155,7 +167,7 @@ export default function HelpCard({
               </div>
             </div>
           </div>
-          <div className="text-red-500 text-center text-[10px] mt-4">
+          <div className=" text-center text-[10px] mt-4 z-50 opacity-60">
             <p className="font-bold">This card for NGO members.</p>
             <p className="font-bold">
               There have no similarities with government scheme.
