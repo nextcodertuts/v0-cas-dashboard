@@ -5,8 +5,9 @@ import prisma from "@/lib/prisma";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -15,7 +16,7 @@ export async function DELETE(
 
   try {
     await prisma.user.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ success: true });
