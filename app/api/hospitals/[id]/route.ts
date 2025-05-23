@@ -8,8 +8,9 @@ import { hash } from "bcrypt";
 // GET a single hospital
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -18,7 +19,7 @@ export async function GET(
 
   try {
     const hospital = await prisma.hospital.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         user: {
           select: {
@@ -49,8 +50,9 @@ export async function GET(
 // UPDATE a hospital
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -65,7 +67,7 @@ export async function PUT(
     const result = await prisma.$transaction(async (tx) => {
       // Update hospital
       const hospital = await tx.hospital.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
           name,
           address,
@@ -108,8 +110,9 @@ export async function PUT(
 // DELETE a hospital
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -118,7 +121,7 @@ export async function DELETE(
 
   try {
     await prisma.hospital.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ success: true });
