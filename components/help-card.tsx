@@ -255,7 +255,7 @@ export default function HelpCard({
                     </div>
                     <div>
                       <p className="text-blue-100 text-[10px]">Helpline</p>
-                      <p className="text-white text-[9px]">+91 7001070713</p>
+                      <p className="text-white text-[9px]">+91 86091 17986</p>
                     </div>
                   </div>
 
