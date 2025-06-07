@@ -139,9 +139,9 @@ export default function HelpCard({
       <div className="space-y-2">
         <div
           ref={frontRef}
-          className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative"
+          className="w-full h-[260px]  overflow-hidden shadow-lg relative"
         >
-          <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col relative z-10">
+          <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-4 flex flex-col relative z-10">
             <Image
               src="/card-2.png"
               alt="Card"
@@ -220,9 +220,9 @@ export default function HelpCard({
       <div className="space-y-2">
         <div
           ref={backRef}
-          className="w-full h-[260px] rounded-xl overflow-hidden shadow-lg relative"
+          className="w-full h-[260px]  overflow-hidden shadow-lg relative"
         >
-          <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-2 flex flex-col justify-center relative z-10">
+          <div className="bg-gradient-to-br from-blue-950 via-blue-850 to-blue-900 h-full p-4 flex flex-col justify-center relative z-10">
             <Image
               src="/card-2.png"
               alt="Card"

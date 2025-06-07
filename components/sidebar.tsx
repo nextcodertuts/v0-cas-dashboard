@@ -20,6 +20,7 @@ import {
   Users,
   Heart,
   Activity,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -139,6 +140,19 @@ export function Sidebar() {
               >
                 <CreditCard className="h-4 w-4 text-orange-400" />
                 {!isCollapsed && "Cards"}
+              </Link>
+              <Link
+                href="/admin/active-cards"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  pathname.startsWith("/admin/active-cards")
+                    ? "bg-accent"
+                    : "transparent"
+                )}
+                title="Active Cards"
+              >
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                {!isCollapsed && "Active Cards"}
               </Link>
             </>
           )}
