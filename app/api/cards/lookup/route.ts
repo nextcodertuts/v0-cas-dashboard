@@ -23,26 +23,44 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Search by phone number or Aadhaar number
+    // Clean the query - remove spaces and special characters for card number search
+    const cleanQuery = query.replace(/\s+/g, "").replace(/[^a-zA-Z0-9]/g, "");
+
+    // Search by card number, phone number, or Aadhaar number
     const cards = await prisma.card.findMany({
       where: {
-        OR: [
+        AND: [
           {
-            household: {
-              phone: query,
-            },
+            status: status as any,
           },
           {
-            household: {
-              members: {
-                some: {
-                  aadhaarNo: query,
+            OR: [
+              // Search by card number (exact match or partial match)
+              {
+                cardNumber: {
+                  contains: cleanQuery,
+                  mode: "insensitive",
                 },
               },
-            },
+              // Search by phone number
+              {
+                household: {
+                  phone: query,
+                },
+              },
+              // Search by Aadhaar number
+              {
+                household: {
+                  members: {
+                    some: {
+                      aadhaarNo: query,
+                    },
+                  },
+                },
+              },
+            ],
           },
         ],
-        status: status as any,
       },
       include: {
         household: {

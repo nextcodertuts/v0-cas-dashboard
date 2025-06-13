@@ -38,6 +38,7 @@ interface CardProps {
   status: CardStatus;
   issueDate: string;
   expiryDate: string;
+  cardNumber: string;
   household: {
     id: string;
     headName: string;
@@ -148,7 +149,8 @@ export default function CardsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Household</TableHead>
+                  <TableHead>Head</TableHead>
+                  <TableHead>Card Number</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Issue Date</TableHead>
@@ -162,6 +164,7 @@ export default function CardsPage() {
                     <TableCell className="font-medium">
                       {card.household.headName}
                     </TableCell>
+                    <TableCell>{card.cardNumber}</TableCell>
                     <TableCell>{card.plan.name}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(card.status)}>

@@ -33,6 +33,7 @@ interface CardDetails {
   status: CardStatus;
   issueDate: string;
   expiryDate: string;
+  cardNumber: string;
   household: {
     id: string;
     headName: string;
@@ -109,7 +110,7 @@ export default function HospitalLookup() {
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="searchQuery">
-                Mobile Number or Aadhaar Number
+                Card Number / Mobile Number or Aadhaar Number
               </Label>
               <div className="flex w-full items-center space-x-2">
                 <Input
@@ -145,7 +146,7 @@ export default function HospitalLookup() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Card ID
                   </p>
-                  <p className="uppercase">{cardDetails.id}</p>
+                  <p className="uppercase">{cardDetails.cardNumber}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
