@@ -22,7 +22,6 @@ async function createAuditLog(
   });
 }
 
-// Helper function to generate unique 8-digit card number
 async function generateUniqueCardNumber(): Promise<string> {
   while (true) {
     // Generate a 16-digit number as a string
@@ -41,7 +40,7 @@ async function generateUniqueCardNumber(): Promise<string> {
   }
 }
 
-// GET all cards (with filtering)
+// GET all cards (with filtering and pagination)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
@@ -52,6 +51,10 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status") as CardStatus | null;
   const householdId = searchParams.get("householdId");
+  const search = searchParams.get("search");
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const offset = (page - 1) * limit;
 
   const where: any = {};
 
@@ -63,16 +66,64 @@ export async function GET(req: NextRequest) {
     where.householdId = householdId;
   }
 
+  if (search) {
+    where.OR = [
+      { cardNumber: { contains: search, mode: "insensitive" } },
+      { household: { headName: { contains: search, mode: "insensitive" } } },
+      { household: { phone: { contains: search, mode: "insensitive" } } },
+      { plan: { name: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  // Add filter for office agents to only see their created households
+  if (session.user.role === "OFFICE_AGENT") {
+    where.household = {
+      ...where.household,
+      createdById: session.user.id,
+    };
+  }
+
   try {
-    const cards = await prisma.card.findMany({
-      where,
-      include: {
-        household: true,
-        plan: true,
+    const [cards, totalCount] = await Promise.all([
+      prisma.card.findMany({
+        where,
+        include: {
+          household: {
+            select: {
+              id: true,
+              headName: true,
+              phone: true,
+            },
+          },
+          plan: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: offset,
+        take: limit,
+      }),
+      prisma.card.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return NextResponse.json({
+      cards,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
       },
     });
-
-    return NextResponse.json(cards);
   } catch (error) {
     console.error("Error fetching cards:", error);
     return NextResponse.json(

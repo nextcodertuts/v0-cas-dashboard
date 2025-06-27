@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +32,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MoreHorizontal, Search } from "lucide-react";
+import {
+  Plus,
+  MoreHorizontal,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,26 +67,52 @@ interface Household {
   } | null;
 }
 
+interface PaginationData {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface HouseholdsResponse {
+  households: Household[];
+  pagination: PaginationData;
+}
+
 export default function HouseholdsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [pagination, setPagination] = useState<PaginationData>({
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || ""
+  );
   const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(
     null
   );
 
   const isAdmin = session?.user?.role === "ADMIN";
+  const currentPage = parseInt(searchParams.get("page") || "1");
 
   useEffect(() => {
-    fetchHouseholds();
-  }, []);
+    fetchHouseholds(currentPage, searchQuery);
+  }, [currentPage]);
 
-  const fetchHouseholds = async (search?: string) => {
+  const fetchHouseholds = async (page: number = 1, search?: string) => {
     setIsLoading(true);
     try {
       const queryParams = new URLSearchParams();
+      queryParams.append("page", page.toString());
+      queryParams.append("limit", "10");
       if (search) {
         queryParams.append("search", search);
       }
@@ -87,8 +120,9 @@ export default function HouseholdsPage() {
       const response = await fetch(`/api/households?${queryParams.toString()}`);
       if (!response.ok) throw new Error("Failed to fetch households");
 
-      const data = await response.json();
-      setHouseholds(data);
+      const data: HouseholdsResponse = await response.json();
+      setHouseholds(data.households);
+      setPagination(data.pagination);
     } catch (error) {
       console.error("Error fetching households:", error);
     } finally {
@@ -98,7 +132,19 @@ export default function HouseholdsPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchHouseholds(searchQuery);
+    const params = new URLSearchParams();
+    if (searchQuery) {
+      params.set("search", searchQuery);
+    }
+    params.set("page", "1"); // Reset to first page on search
+    router.push(`/agent/households?${params.toString()}`);
+    fetchHouseholds(1, searchQuery);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    router.push(`/agent/households?${params.toString()}`);
   };
 
   const getStatusColor = (status: string | undefined) => {
@@ -136,7 +182,7 @@ export default function HouseholdsPage() {
         throw new Error("Failed to delete household");
       }
 
-      await fetchHouseholds(searchQuery);
+      await fetchHouseholds(currentPage, searchQuery);
       setDeleteHouseholdId(null);
     } catch (error) {
       console.error("Error deleting household:", error);
@@ -157,7 +203,7 @@ export default function HouseholdsPage() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader hidden>
           <CardTitle>Manage Households</CardTitle>
           <CardDescription>
             View and manage all registered households
@@ -183,78 +229,142 @@ export default function HouseholdsPage() {
           ) : households.length === 0 ? (
             <div className="text-center py-4">No households found</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Head Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Members</TableHead>
-                  <TableHead>Card Status</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {households.map((household) => (
-                  <TableRow key={household.id}>
-                    <TableCell className="font-medium">
-                      {household.headName}
-                    </TableCell>
-                    <TableCell>{household.phone}</TableCell>
-                    <TableCell>{household.members.length}</TableCell>
-                    <TableCell>
-                      {household.card ? (
-                        <Badge
-                          className={getStatusColor(household.card.status)}
-                        >
-                          {household.card.status}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">NO CARD</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{household.card?.plan.name || "N/A"}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => handleViewDetails(household.id)}
-                          >
-                            View details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(household.id)}
-                          >
-                            Edit household
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {isAdmin && !household.card && (
-                            <DropdownMenuItem
-                              onClick={() => handleCreateCard(household.id)}
-                            >
-                              Issue card
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteHouseholdId(household.id)}
-                          >
-                            Delete household
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Head Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Members</TableHead>
+                    <TableHead>Card Status</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {households.map((household) => (
+                    <TableRow key={household.id}>
+                      <TableCell className="font-medium">
+                        {household.headName}
+                      </TableCell>
+                      <TableCell>{household.phone}</TableCell>
+                      <TableCell>{household.members.length}</TableCell>
+                      <TableCell>
+                        {household.card ? (
+                          <Badge
+                            className={getStatusColor(household.card.status)}
+                          >
+                            {household.card.status}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">NO CARD</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {household.card?.plan.name || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetails(household.id)}
+                            >
+                              View details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(household.id)}
+                            >
+                              Edit household
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {isAdmin && !household.card && (
+                              <DropdownMenuItem
+                                onClick={() => handleCreateCard(household.id)}
+                              >
+                                Issue card
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteHouseholdId(household.id)}
+                            >
+                              Delete household
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {households.length} of {pagination.totalCount}{" "}
+                  households
+                  {searchQuery && ` for "${searchQuery}"`}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={!pagination.hasPreviousPage}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center space-x-1">
+                    {Array.from(
+                      { length: Math.min(5, pagination.totalPages) },
+                      (_, i) => {
+                        let pageNumber;
+                        if (pagination.totalPages <= 5) {
+                          pageNumber = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNumber = i + 1;
+                        } else if (currentPage >= pagination.totalPages - 2) {
+                          pageNumber = pagination.totalPages - 4 + i;
+                        } else {
+                          pageNumber = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <Button
+                            key={pageNumber}
+                            variant={
+                              currentPage === pageNumber ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNumber)}
+                            className="w-8 h-8 p-0"
+                          >
+                            {pageNumber}
+                          </Button>
+                        );
+                      }
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={!pagination.hasNextPage}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
