@@ -26,6 +26,11 @@ export async function GET(req: NextRequest) {
     where.status = status;
   }
 
+  // Hospital users can only see beneficiaries they created
+  if (session.user.role === "HOSPITAL_USER") {
+    where.createdById = session.user.id;
+  }
+
   try {
     const beneficiaries = await prisma.beneficiary.findMany({
       where,

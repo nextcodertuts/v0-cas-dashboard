@@ -123,7 +123,7 @@ export default function BeneficiariesPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Beneficiaries</h2>
+        <h2 className="text-3xl font-bold tracking-tight">My Beneficiaries</h2>
         <Button onClick={() => router.push("/hospital/beneficiaries/new")}>
           <Plus className="mr-2 h-4 w-4" /> New Beneficiary
         </Button>
@@ -131,8 +131,10 @@ export default function BeneficiariesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Manage Beneficiaries</CardTitle>
-          <CardDescription>View and manage all beneficiaries</CardDescription>
+          <CardTitle>Manage My Beneficiaries</CardTitle>
+          <CardDescription>
+            View and manage beneficiaries you created
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -208,7 +210,7 @@ export default function BeneficiariesPage() {
                           <DropdownMenuItem
                             onClick={() =>
                               router.push(
-                                `/hospital/beneficiaries/${beneficiary.id}/edit`
+                                `/admin/beneficiaries/${beneficiary.id}/edit`
                               )
                             }
                           >

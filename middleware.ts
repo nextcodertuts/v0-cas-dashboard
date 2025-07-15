@@ -25,6 +25,12 @@ export default async function middleware(req: NextRequestWithAuth) {
     }
   }
 
+  if (pathname.startsWith("/admin/beneficiaries")) {
+    if (!token || token.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/auth/signin", req.url));
+    }
+  }
+
   // API route protection
   if (pathname.startsWith("/api/")) {
     // Allow auth API routes
